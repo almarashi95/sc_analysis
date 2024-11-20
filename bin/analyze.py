@@ -12,7 +12,10 @@ import copy as cp
 def analyze_all(frame):
     # Prints frame number to terminal for each frame.
     # Can be piped to a file and used to track progress
-    print('imaframe')
+
+
+    expected_leaflets = int(input("How many leaflets do we expect in this model?"))
+    n_leaflets = expected_leaflets
 
     # Note: if you want to calculate properties for a particular layer,
     # slice it out prior to running this function
@@ -39,47 +42,50 @@ def analyze_all(frame):
                 threshold=[0, frame.n_leaflets]
                 )
 
-    # Get z-ranges encompassing each leaflet
-    leaflet_centers = (peaks[1:] + peaks[:-1]) * 0.5
-    leaflet_centers = [-np.inf] + list(leaflet_centers) + [np.inf]
-    leaflet_ranges = [(leaflet_centers[i], leaflet_centers[i+1])
-                      for i in range(len(leaflet_centers)-1)]
-
-    # Get the tilt angle and nematic order for each leaflet
-    tilt = []
-    s2 = []
-    apt = []
-    for lmin, lmax in leaflet_ranges:
-        mask = np.logical_and(coms[:,2] > lmin,
-                              coms[:,2] < lmax)
-        leaflet_directors = directors[mask]
-        leaflet_tilt = analysis.utils.calc_tilt_angle(leaflet_directors)
-        leaflet_apt = (frame.unitcell_lengths[0] * frame.unitcell_lengths[1] /
-                       np.sum(mask))
-        leaflet_s2 = analysis.utils.calc_order_parameter(leaflet_directors)
-        tilt.append(leaflet_tilt)
-        s2.append(leaflet_s2)
-        apt.append(leaflet_apt)
-
-    # Calculate Area per Lipid: cross section / n_lipids
-    apl = (frame.unitcell_lengths[0] * frame.unitcell_lengths[1] /
-            len(frame.residuelist) * frame.n_leaflets)
-
-    # Calculate the height -- uses the "head" atoms specified below
-    if frame.cg:
-        atomselection = "mhead2 oh1 oh2 oh3 oh4 oh5 amide chead head"
-        atomselection = atomselection.split(' ')
-        atoms = frame.select(names=atomselection)
-    else:
-        atomselection = [13.0, 100.0]
-        atoms = frame.select(mass_range=atomselection)
-    height = analysis.height.calc_height(frame, atoms)
-
-    results = {'tilt' :  np.array(tilt),
-                's2' : s2,
-                'apl' : apl,
-                'apt' : np.array(apt),
-                'height' : np.array(height)}
+    found_leaflets = len(peaks) * 2 -2
+    if found_leaflets == n_leaflets:
+        # Get z-ranges encompassing each leaflet
+        midpoints = (peaks[:-1] + peaks[1:]) / 2
+        all_leaflet_points = np.concatenate((peaks, midpoints))
+        all_leaflet_points = np.sort(all_leaflet_points)
+        leaflet_ranges = [(leaflet_centers[i], leaflet_centers[i+1])
+                          for i in range(len(leaflet_centers)-1)]
+        
+        # Get the tilt angle and nematic order for each leaflet
+        tilt = []
+        s2 = []
+        apt = []
+        for lmin, lmax in leaflet_ranges:
+            mask = np.logical_and(coms[:,2] > lmin,
+                                  coms[:,2] < lmax)
+            leaflet_directors = directors[mask]
+            leaflet_tilt = analysis.utils.calc_tilt_angle(leaflet_directors)
+            leaflet_apt = (frame.unitcell_lengths[0] * frame.unitcell_lengths[1] /
+                           np.sum(mask))
+            leaflet_s2 = analysis.utils.calc_order_parameter(leaflet_directors)
+            tilt.append(leaflet_tilt)
+            s2.append(leaflet_s2)
+            apt.append(leaflet_apt)
+    
+        # Calculate Area per Lipid: cross section / n_lipids
+        apl = (frame.unitcell_lengths[0] * frame.unitcell_lengths[1] /
+                len(frame.residuelist) * frame.n_leaflets)
+    
+        # Calculate the height -- uses the "head" atoms specified below
+        if frame.cg:
+            atomselection = "mhead2 oh1 oh2 oh3 oh4 oh5 amide chead head"
+            atomselection = atomselection.split(' ')
+            atoms = frame.select(names=atomselection)
+        else:
+            atomselection = [13.0, 100.0]
+            atoms = frame.select(mass_range=atomselection)
+        height = analysis.height.calc_height(frame, atoms)
+    
+        results = {'tilt' :  np.array(tilt),
+                    's2' : s2,
+                    'apl' : apl,
+                    'apt' : np.array(apt),
+                    'height' : np.array(height)}
     return results
 
 def main():
