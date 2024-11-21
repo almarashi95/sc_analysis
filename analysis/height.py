@@ -7,7 +7,7 @@ from scipy.signal import find_peaks
 __all__ = ["calc_peaks", "calc_height"]
 
 
-def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=True, **kwargs):
+def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, max_retries = 5, **kwargs):
     """ Calculate the locations of peaks in 1-D mass density
     Calculates a mass-weighted density histogram along the z-dimension
 
@@ -34,7 +34,7 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=True, **k
         list of z-coordinates at which there are peaks in the mass
         density histogram
     """
-
+    n_expectedPeaks = 
     # Create histogram
     if weights is None:
         weights = np.ones_like(z)
@@ -66,17 +66,19 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=True, **k
             "There is an unequal number of peaks "
             + "({}) and layers ({})".format(len(peaks), n_layers)
         )
-        # remove the last few peaks if there are too many
-        if len(peaks) > n_layers:
-            peaks = peaks[:n_layers]
-        # adds peaks via linear interpolation if there are too few
-        else:
-            for _ in range(n_layers - len(peaks)):
-                try:
-                    np.append(peaks, 2 * peaks[-1] - peaks[-2])
-                except IndexError:
-                    np.append(peaks, peaks[-1])
-
+        while retries < max_retries:
+        peaks, _ = find_peaks(hist, **kwargs)
+        peaks = bins[peaks]
+            # remove the last few peaks if there are too many
+            if len(peaks) > n_layers:
+                # If we have more peaks than needed, we increase prominence to focus on more significant peaks, and increase distance to merge closely spaced peaks together
+                kwargs["prominence"] *= 1.05
+                kwargs["distance"] += 0.5
+            # adds peaks via linear interpolation if there are too few. Here we decrease prominence to include smaller peaks and decrease distance
+            else:
+                kwargs["prominence"] *= 0.95
+                kwargs["distance"] = max(1, kwargs["distance"] - 1)
+            retries += 1
     return peaks
 
 
