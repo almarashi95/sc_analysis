@@ -67,8 +67,8 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
             + "({}) and layers ({})".format(len(peaks), n_expectedPeaks)
         )
         while retries < max_retries:
-        peaks, _ = find_peaks(hist, **kwargs)
-        peaks = bins[peaks]
+            peaks, _ = find_peaks(hist, **kwargs)
+            peaks = bins[peaks]
             # remove the last few peaks if there are too many
             if len(peaks) > n_expectedPeaks:
                 # If we have more peaks than needed, we increase prominence to focus on more significant peaks, and increase distance to merge closely spaced peaks together
