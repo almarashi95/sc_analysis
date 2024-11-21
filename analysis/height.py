@@ -34,7 +34,7 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
         list of z-coordinates at which there are peaks in the mass
         density histogram
     """
-    n_expectedPeaks = 
+    n_expectedPeaks = (n_layers/2) + 1
     # Create histogram
     if weights is None:
         weights = np.ones_like(z)
@@ -55,22 +55,22 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
     if "distance" not in kwargs:
         kwargs["distance"] = 25
     if "threshold" not in kwargs:
-        kwargs["threshold"] = [0, n_layers]
+        kwargs["threshold"] = [0, n_expectedPeaks]
     peaks, _ = find_peaks(hist, **kwargs)
     peaks = np.sort(peaks)
     peaks = bins[peaks]
 
     # Warns if there is an unequal number of peaks and layers
-    if len(peaks) != n_layers:
+    if len(peaks) != n_expectedPeaks:
         warnings.warn(
             "There is an unequal number of peaks "
-            + "({}) and layers ({})".format(len(peaks), n_layers)
+            + "({}) and layers ({})".format(len(peaks), n_expectedPeaks)
         )
         while retries < max_retries:
         peaks, _ = find_peaks(hist, **kwargs)
         peaks = bins[peaks]
             # remove the last few peaks if there are too many
-            if len(peaks) > n_layers:
+            if len(peaks) > n_expectedPeaks:
                 # If we have more peaks than needed, we increase prominence to focus on more significant peaks, and increase distance to merge closely spaced peaks together
                 kwargs["prominence"] *= 1.05
                 kwargs["distance"] += 0.5
