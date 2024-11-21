@@ -37,8 +37,6 @@ def analyze_all(frame):
     peaks = analysis.height.calc_peaks(
                 z, [np.min(z), np.max(z)],
                 n_layers=frame.n_leaflets,
-                prominence=0,
-                distance=50,
                 threshold=[0, frame.n_leaflets]
                 )
 
