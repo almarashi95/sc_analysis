@@ -15,7 +15,12 @@ def analyze_all(frame):
 
 
     expected_leaflets = int(input("How many leaflets do we expect in this model?"))
-    n_leaflets = expected_leaflets
+    
+    tilt_all = [[] for _ in range(expected_leaflets)]  # Nested lists for tilt
+    s2_all = [[] for _ in range(expected_leaflets)]  # Nested lists for nematic order
+    apt_all = [[] for _ in range(expected_leaflets)]  # Nested lists for APT
+    height_all = [[] for _ in range(expected_leaflets/2)]  # Heights are between leaflets
+    apl_all = []
 
     # Note: if you want to calculate properties for a particular layer,
     # slice it out prior to running this function
@@ -61,13 +66,22 @@ def analyze_all(frame):
             leaflet_apt = (frame.unitcell_lengths[0] * frame.unitcell_lengths[1] /
                            np.sum(mask))
             leaflet_s2 = analysis.utils.calc_order_parameter(leaflet_directors)
-            tilt.append(leaflet_tilt)
+            tilt.append(np.mean(leaflet_tilt))  # Taking an average of tilt values per leaflet since it will be easier to process later
             s2.append(leaflet_s2)
             apt.append(leaflet_apt)
+
+        for i, t in enumerate(tilt):
+            tilt_all[i].append(t)
+            
+         # Append results per leaflet
+        for i, (s, a) in enumerate(zip(s2, apt)):
+            s2_all[i].append(s)
+            apt_all[i].append(a)
     
         # Calculate Area per Lipid: cross section / n_lipids
         apl = (frame.unitcell_lengths[0] * frame.unitcell_lengths[1] /
                 len(frame.residuelist) * frame.n_leaflets)
+        apl_all.append(apl)
     
         # Calculate the height -- uses the "head" atoms specified below
         if frame.cg:
@@ -78,13 +92,32 @@ def analyze_all(frame):
             atomselection = [13.0, 100.0]
             atoms = frame.select(mass_range=atomselection)
         height = analysis.height.calc_height(frame, atoms)
-    
-        results = {'tilt' :  np.array(tilt),
+        height_all.append(heights)
+
+        results_per_frame = {'tilt' :  np.array(tilt),
                     's2' : s2,
                     'apl' : apl,
                     'apt' : np.array(apt),
                     'height' : np.array(height)}
-    return results
+
+
+    # Finding averages 
+    avg_tilt = [np.mean(leaflet) for leaflet in tilt_all]
+    avg_s2 = [np.mean(leaflet) for leaflet in s2_all]
+    avg_apt = [np.mean(leaflet) for leaflet in apt_all]
+    avg_apl = np.mean(apl_all)
+    avg_height = (np.mean(height_all, axis = 0)
+
+    averages = {
+        "avg_tilt": avg_tilt,
+        "avg_s2": avg_s2,
+        "avg_apt": avg_apt,
+        "avg_apl": avg_apl,
+        "avg_height": avg_height,
+    }
+    print(averages)
+        
+    return results_per_frame
 
 def main():
     ## PARSING INPUTS
