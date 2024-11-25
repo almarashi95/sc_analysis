@@ -119,5 +119,8 @@ def calc_height(frame, atoms, window=41):
     peaks = calc_peaks(z, z_range, weights=weights,
                        n_layers=n_layers, window=window)
     peaks = np.sort(peaks)
-    height = peaks[1:] - peaks[:-1]
+    height = []
+    for i in range(0,len(peaks)-1): 
+        height_between_peaks = peaks[i+1] - peaks[i]
+    height.append(height_between_peaks)
     return height
