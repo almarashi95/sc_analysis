@@ -41,8 +41,8 @@ def analyze_all(frame):
     z = coms[:,2]
     peaks = analysis.height.calc_peaks(
                 z, [np.min(z), np.max(z)],
-                n_layers=frame.n_leaflets,
-                threshold=[0, frame.n_leaflets]
+                n_layers=expected_leaflets,
+                threshold=[0, expected_leaflets]
                 )
 
     found_leaflets = len(peaks) * 2 -2
@@ -80,7 +80,7 @@ def analyze_all(frame):
     
         # Calculate Area per Lipid: cross section / n_lipids
         apl = (frame.unitcell_lengths[0] * frame.unitcell_lengths[1] /
-                len(frame.residuelist) * frame.n_leaflets)
+                len(frame.residuelist) * expected_leaflets)
         apl_all.append(apl)
     
         # Calculate the height -- uses the "head" atoms specified below
