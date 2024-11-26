@@ -34,7 +34,7 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
         list of z-coordinates at which there are peaks in the mass
         density histogram
     """
-    n_expectedPeaks = (n_layers/2) + 1
+    n_expectedPeaks = int((n_layers/2) + 1)
     # Create histogram
     if weights is None:
         weights = np.ones_like(z)
@@ -123,5 +123,5 @@ def calc_height(frame, atoms, window=41):
     height = []
     for i in range(0,len(peaks)-1): 
         height_between_peaks = peaks[i+1] - peaks[i]
-    height.append(height_between_peaks)
+        height.append(height_between_peaks)
     return height
