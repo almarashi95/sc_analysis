@@ -66,6 +66,7 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
             "There is an unequal number of peaks "
             + "({}) and layers ({})".format(len(peaks), n_expectedPeaks)
         )
+        retries = 0
         while retries < max_retries:
             peaks, _ = find_peaks(hist, **kwargs)
             peaks = bins[peaks]
