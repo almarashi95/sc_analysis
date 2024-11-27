@@ -13,7 +13,7 @@ def analyze_all(frame):
     # Prints frame number to terminal for each frame.
     # Can be piped to a file and used to track progress
 
-
+    results_per_frame = {}
     # Note: if you want to calculate properties for a particular layer,
     # slice it out prior to running this function
 
@@ -64,7 +64,7 @@ def analyze_all(frame):
     
         # Calculate Area per Lipid: cross section / n_lipids
         apl = (frame.unitcell_lengths[0] * frame.unitcell_lengths[1] /
-                len(frame.residuelist) * expected_leaflets)
+                len(frame.residuelist) * frame.n_leaflets)
     
         # Calculate the height -- uses the "head" atoms specified below
         if frame.cg:
