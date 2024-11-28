@@ -250,7 +250,7 @@ def main():
         pickle.dump(results, f)
     print('Finished!')
 
- averages = calculate_averages_from_results(results)
+    averages = calculate_averages_from_results(results)
     print("Final Averages:")
     print(averages)
 
