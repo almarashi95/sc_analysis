@@ -10,12 +10,15 @@ from analysis.frame import Frame
 import copy as cp
 
 def analyze_all(frame):
-    # Prints frame number to terminal for each frame.
-    # Can be piped to a file and used to track progress
-
+    
     results_per_frame = {}
-    # Note: if you want to calculate properties for a particular layer,
-    # slice it out prior to running this function
+    # Setting how many peaks we require based upon leaflets in the system. Since we are finding peaks and leaflet positions based on the midpoints of the COM locations, this changes the number of peaks we require.
+    if frame.n_leaflets == 6:
+        needed_peaks = 3 
+    elif frame.n_leaflets == 4:
+        needed_peaks = 2
+    elif frame.n_leaflets == 2:
+        needed_peaks = 2
 
     # Unpack inputs
     frame.validate_frame()
@@ -34,16 +37,29 @@ def analyze_all(frame):
     peaks = analysis.height.calc_peaks(
                 z, [np.min(z), np.max(z)],
                 n_layers=frame.n_leaflets,
+                prominence=0,
+                distance=50,
                 threshold=[0, frame.n_leaflets]
                 )
-
-    found_leaflets = len(peaks) * 2 -2
-    if found_leaflets == frame.n_leaflets:
-        # Get z-ranges encompassing each leaflet
-        midpoints = (peaks[:-1] + peaks[1:]) / 2
-        all_leaflet_points = np.concatenate((peaks, midpoints))
-        all_leaflet_points = np.sort(all_leaflet_points)
-        leaflet_ranges = [(all_leaflet_points[i], all_leaflet_points[i+1])
+    
+    
+    if len(peaks) == needed_peaks:
+        if len(peaks) == 2:
+            
+            # Here the midpoint between the 2 peaks shows the leaflet position.
+            midpoints = (peaks[:-1] + peaks[1:]) * 0.5
+            all_leaflet_points = [-np.inf] + list(midpoints) + [np.inf]
+            all_leaflet_points = np.sort(all_leaflet_points)
+            leaflet_ranges = [(all_leaflet_points[i], all_leaflet_points[i+1])
+                          for i in range(len(all_leaflet_points)-1)]
+        
+        # Essentially, the midpoints here refer to the leaflet boundary in a bilayer while the midpoints are the middle bilayer boundaries. We do not find the values of the top most and bottom most layer and instead use inf
+        # We just have to make sure that the kwargs (especially distance) used to calculate peaks are well defined otherwise we might get really close together.
+        elif found_leaflets == 6:
+            midpoints = (peaks[:-1] + peaks[1:]) * 0.5
+            all_leaflet_points = [-np.inf] + list(midpoints)  + list(peaks) + [np.inf]
+            all_leaflet_points = np.sort(all_leaflet_points)
+            leaflet_ranges = [(all_leaflet_points[i], all_leaflet_points[i+1])
                           for i in range(len(all_leaflet_points)-1)]
         
         # Get the tilt angle and nematic order for each leaflet
