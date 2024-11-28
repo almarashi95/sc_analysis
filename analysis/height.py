@@ -34,7 +34,12 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
         list of z-coordinates at which there are peaks in the mass
         density histogram
     """
-    n_expectedPeaks = int((n_layers/2) + 1)
+    if frame.n_leaflets == 6:
+        n_expectedPeaks = 3 
+    elif frame.n_leaflets == 4:
+        n_expectedPeaks = 2
+    elif expected.n_leaflets == 2:
+        n_expectedPeaks = 2)
     # Create histogram
     if weights is None:
         weights = np.ones_like(z)
@@ -73,14 +78,14 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
             # remove the last few peaks if there are too many
             if len(peaks) > n_expectedPeaks:
                 # If we have more peaks than needed, we increase prominence to focus on more significant peaks, and increase distance to merge closely spaced peaks together
-                kwargs["prominence"] *= 1.05
-                kwargs["distance"] += 0.5
+                kwargs["prominence"] += 1.05
+                kwargs["distance"] += 2
             # adds peaks via linear interpolation if there are too few. Here we decrease prominence to include smaller peaks and decrease distance
             else:
-                kwargs["prominence"] *= 0.95
-                kwargs["distance"] = max(1, kwargs["distance"] - 1)
+                kwargs["prominence"] -= 0.9
+                kwargs["distance"] = max(1, kwargs["distance"] - 3)
             retries += 1
-    return peaks
+    return peak
 
 
 def calc_height(frame, atoms, window=41):
