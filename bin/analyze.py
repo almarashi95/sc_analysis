@@ -132,13 +132,28 @@ def calculate_averages_from_results(results):
         apl_all.append(frame_results['apl'])
         height_all.append(frame_results['height'])
 
-    # Handle potential empty lists
-    avg_tilt = [np.mean(tilt) if tilt else np.nan for tilt in zip(*tilt_all)]
-    avg_s2 = [np.mean(s2) if s2 else np.nan for s2 in zip(*s2_all)]
-    avg_apt = [np.mean(apt) if apt else np.nan for apt in zip(*apt_all)]
-    avg_apl = np.mean(apl_all) if apl_all else np.nan
-    avg_height = np.mean(height_all, axis=0) if height_all else np.array([])
+    # Handle cases where lists might be empty
+    if tilt_all:
+        max_len = max(len(x) for x in tilt_all if len(x) > 0)  # Find the longest list length
+        tilt_all = [list(x) + [np.nan] * (max_len - len(x)) if len(x) > 0 else [np.nan] * max_len for x in tilt_all]
+        s2_all = [list(x) + [np.nan] * (max_len - len(x)) if len(x) > 0 else [np.nan] * max_len for x in s2_all]
+        apt_all = [list(x) + [np.nan] * (max_len - len(x)) if len(x) > 0 else [np.nan] * max_len for x in apt_all]
+    else:
+        max_len = 0
+        tilt_all = []
+        s2_all = []
+        apt_all = []
 
+    # Calculate averages for tilt, s2, apt across all frames
+    avg_tilt = [np.nanmean(tilt) for tilt in zip(*tilt_all)]
+    avg_s2 = [np.nanmean(s2) for s2 in zip(*s2_all)]
+    avg_apt = [np.nanmean(apt) for apt in zip(*apt_all)]
+
+    # Calculate average APL and height
+    avg_apl = np.nanmean(apl_all) if apl_all else np.nan
+    avg_height = np.nanmean(height_all, axis=0) if height_all else np.array([])
+
+    # Return all averaged results
     return {
         "avg_tilt": avg_tilt,
         "avg_s2": avg_s2,
@@ -146,6 +161,7 @@ def calculate_averages_from_results(results):
         "avg_apl": avg_apl,
         "avg_height": avg_height,
     }
+
 
 def main():
     ## PARSING INPUTS
