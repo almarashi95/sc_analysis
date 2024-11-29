@@ -34,12 +34,12 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
         list of z-coordinates at which there are peaks in the mass
         density histogram
     """
-    if frame.n_leaflets == 6:
-        n_expectedPeaks = 3 
-    elif frame.n_leaflets == 4:
+    if n_layers == 6:
+        n_expectedPeaks = 3
+    elif n_layers == 4:
         n_expectedPeaks = 2
-    elif expected.n_leaflets == 2:
-        n_expectedPeaks = 2)
+    elif n_layers == 2:
+        n_expectedPeaks = 2
     # Create histogram
     if weights is None:
         weights = np.ones_like(z)
@@ -56,11 +56,11 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
     # Gets peak indices
     # Prominance: https://en.wikipedia.org/wiki/Topographic_prominence
     if "prominence" not in kwargs:
-        kwargs["prominence"] = np.max(hist) * 0.25
+        kwargs["prominence"] = 0
     if "distance" not in kwargs:
-        kwargs["distance"] = 25
-    if "threshold" not in kwargs:
-        kwargs["threshold"] = [0, n_expectedPeaks]
+        kwargs["distance"] = 20
+    if "height" not in kwargs:
+        kwargs["height"] = 0
     peaks, _ = find_peaks(hist, **kwargs)
     peaks = np.sort(peaks)
     peaks = bins[peaks]
@@ -78,15 +78,14 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
             # remove the last few peaks if there are too many
             if len(peaks) > n_expectedPeaks:
                 # If we have more peaks than needed, we increase prominence to focus on more significant peaks, and increase distance to merge closely spaced peaks together
-                kwargs["prominence"] += 1.05
-                kwargs["distance"] += 2
+                kwargs["prominence"] += 3
+                kwargs["distance"] += 5
             # adds peaks via linear interpolation if there are too few. Here we decrease prominence to include smaller peaks and decrease distance
             else:
-                kwargs["prominence"] -= 0.9
-                kwargs["distance"] = max(1, kwargs["distance"] - 3)
+                kwargs["prominence"] -= 3
+                kwargs["distance"] = max(1, kwargs["distance"] - 5)
             retries += 1
-    return peak
-
+    return peaks, hist
 
 def calc_height(frame, atoms, window=41):
     """ Calculate the height of layers in frame
@@ -122,11 +121,12 @@ def calc_height(frame, atoms, window=41):
     # Get weighting for histogram
     weights=frame.masses.take(atoms)
 
-    peaks = calc_peaks(z, z_range, weights=weights,
+    peaks, hist = calc_peaks(z, z_range, weights=weights,
                        n_layers=n_layers, window=window)
     peaks = np.sort(peaks)
     height = []
-    for i in range(0,len(peaks)-1): 
+
+    for i in range(0,len(peaks)-1):
         height_between_peaks = peaks[i+1] - peaks[i]
         height.append(height_between_peaks)
     return height
