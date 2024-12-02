@@ -110,6 +110,19 @@ def calc_height(frame, atoms, window=41):
 
     atoms = np.array(atoms)
 
+    
+    # Change these values here if you do not get any value for height.
+    if frame.n_leaflets == 6:
+        n_expectedPeaks = 3
+        prominence = 20   # Values need to be checked. 
+        distance = 5
+    elif frame.n_leaflets == 4:
+        n_expectedPeaks = 2
+    elif frame.n_leaflets == 2:
+        n_expectedPeaks = 2
+        prominence = 45
+        distance = 10
+
     # Heuristic for getting the n_layers from n_leaflets
     n_layers = int(frame.n_leaflets / 2 + 1)
     box_length = frame.unitcell_lengths[2]
@@ -122,10 +135,12 @@ def calc_height(frame, atoms, window=41):
     weights=frame.masses.take(atoms)
 
     peaks, hist = calc_peaks(z, z_range, weights=weights,
-                       n_layers=n_layers, window=window)
+                       n_layers=n_layers, window=window, prominence = prominence, distance = distance)
     peaks = np.sort(peaks)
+    if len(peaks) != n_expectedPeaks:
+        return None
+    
     height = []
-
     for i in range(0,len(peaks)-1):
         height_between_peaks = peaks[i+1] - peaks[i]
         height.append(height_between_peaks)
