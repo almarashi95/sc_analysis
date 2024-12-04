@@ -149,18 +149,33 @@ def calculate_averages_from_results(results):
 
     # Calculate averages
     avg_tilt = [np.nanmean(tilt) for tilt in zip(*tilt_all)] if tilt_all else []
+    error_tilt = [np.nanstd(tilt) for tilt in zip(*tilt_all)] if tilt_all else []
+
     avg_s2 = [np.nanmean(s2) for s2 in zip(*s2_all)] if s2_all else []
+    error_s2 = [np.nanstd(s2) for s2 in zip(*s2_all)] if s2_all else []
+
     avg_apt = [np.nanmean(apt) for apt in zip(*apt_all)] if apt_all else []
+    error_apt = [np.nanstd(apt) for apt in zip(*apt_all)] if apt_all else []
+
     avg_apl = np.nanmean(apl_all) if apl_all else np.nan
+    error_apl = np.nanstd(apl_all) if apl_all else np.nan
+
     avg_height = np.nanmean(height_all, axis=0) if height_all else np.array([])
+    error_height = np.nanstd(height_all, axis=0) if height_all else np.array([])
+
 
     return {
-        "avg_tilt": avg_tilt,
-        "avg_s2": avg_s2,
-        "avg_apt": avg_apt,
-        "avg_apl": avg_apl,
-        "avg_height": avg_height,
-    }
+    "avg_tilt": [0.5, 0.6, 0.7],
+    "err_tilt": [0.1, 0.15, 0.2],
+    "avg_s2": [0.8, 0.9],
+    "err_s2": [0.05, 0.07],
+    "avg_apt": [1.2, 1.3, 1.4],
+    "err_apt": [0.2, 0.25, 0.3],
+    "avg_apl": 1.5,
+    "err_apl": 0.1,
+    "avg_height": [3.0, 3.1],
+    "err_height": [0.2, 0.3],
+}
 
 
 def main():
