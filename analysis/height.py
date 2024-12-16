@@ -1,4 +1,4 @@
-import warnings
+import warnings:
 import mdtraj as md
 import numpy as np
 from analysis.smoothing import savitzky_golay
@@ -45,7 +45,7 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
         weights = np.ones_like(z)
 
     hist, edges = np.histogram(
-        z, weights=weights, range=z_range, bins=400
+z, weights=weights, range=z_range, bins=400
     )
     bins = (edges[1:] + edges[:-1]) * 0.5
 
@@ -78,11 +78,11 @@ def calc_peaks(z, z_range, weights=None, n_layers=0, window=41, smooth=False, ma
             # remove the last few peaks if there are too many
             if len(peaks) > n_expectedPeaks:
                 # If we have more peaks than needed, we increase prominence to focus on more significant peaks, and increase distance to merge closely spaced peaks together
-                kwargs["prominence"] += 3
+                kwargs["prominence"] += 0.5
                 kwargs["distance"] += 5
             # adds peaks via linear interpolation if there are too few. Here we decrease prominence to include smaller peaks and decrease distance
             else:
-                kwargs["prominence"] -= 3
+                kwargs["prominence"] -= 0.5
                 kwargs["distance"] = max(1, kwargs["distance"] - 5)
             retries += 1
     return peaks, hist
@@ -92,7 +92,7 @@ def calc_height(frame, atoms, window=41):
     Obtains peak locations the calc_peaks function and takes the
     difference in adjacent peak locations to get the heights.
 
-    Parameters:
+Parameters:
     -----------
     frame : analysis.Frame
         The frame to be analyzed
@@ -110,11 +110,11 @@ def calc_height(frame, atoms, window=41):
 
     atoms = np.array(atoms)
 
-    
+
     # Change these values here if you do not get any value for height.
     if frame.n_leaflets == 6:
         n_expectedPeaks = 3
-        prominence = 20   # Values need to be checked. 
+        prominence = 20   # Values need to be checked.
         distance = 5
     elif frame.n_leaflets == 4:
         n_expectedPeaks = 2
@@ -126,7 +126,6 @@ def calc_height(frame, atoms, window=41):
     # Heuristic for getting the n_layers from n_leaflets
     n_layers = int(frame.n_leaflets / 2 + 1)
     box_length = frame.unitcell_lengths[2]
-
     # Collect centered z coordinates and box dimensions
     z = frame.xyz[atoms, 2].reshape(-1) - np.mean(frame.xyz[atoms, 2])
     z_range = [-box_length * 0.5 - 0.01, box_length * 0.5 + 0.01]
@@ -138,8 +137,8 @@ def calc_height(frame, atoms, window=41):
                        n_layers=n_layers, window=window, prominence = prominence, distance = distance)
     peaks = np.sort(peaks)
     if len(peaks) != n_expectedPeaks:
-        return None
-    
+        return np.nan
+
     height = []
     for i in range(0,len(peaks)-1):
         height_between_peaks = peaks[i+1] - peaks[i]
