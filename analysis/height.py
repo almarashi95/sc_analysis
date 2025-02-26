@@ -1,4 +1,4 @@
-import warnings:
+import warnings
 import mdtraj as md
 import numpy as np
 from analysis.smoothing import savitzky_golay

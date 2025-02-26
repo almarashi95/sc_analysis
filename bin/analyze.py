@@ -50,8 +50,7 @@ def analyze_all(frame):
             leaflet_ranges = [(all_leaflet_points[i], all_leaflet_points[i+1])
                           for i in range(len(all_leaflet_points)-1)]
 
-        # Essentially, the midpoints here refer to the leaflet boundary in a bilayer while the midpoints are the middle bilayer boundaries. We do not find the values of the top mo
-st and bottom most layer and instead use inf
+        # Essentially, the midpoints here refer to the leaflet boundary in a bilayer while the midpoints are the middle bilayer boundaries. We do not find the values of the top most and bottom most layer and instead use inf
         # We just have to make sure that the kwargs (especially distance) used to calculate peaks are well defined otherwise we might get really close together.
         elif found_leaflets == 6:
             midpoints = (peaks[:-1] + peaks[1:]) *0.5
@@ -88,9 +87,7 @@ st and bottom most layer and instead use inf
         else:
             atomselection = [13.0, 100.0]
             atoms = frame.select(mass_range=atomselection)
-            else:
-            atomselection = [13.0, 100.0]
-            atoms = frame.select(mass_range=atomselection)
+            
         height = analysis.height.calc_height(frame, atoms)
 
         results_per_frame = {'tilt' :  np.array(tilt),
@@ -238,7 +235,7 @@ def main():
             # keep only the lipids
             sel_atoms = traj.top.select("(not name water) and " +
                                         "(not resname tip3p " +
-                                        "HOH SOL)")
+                                        "HOH SOL) and not resname DCF and not resname dcfh and not resname NA and not resname DEA")
         else:
             print('Parsing trajectory based on selection: ', selection_string)
             sel_atoms = traj.top.select("( " + selection_string + ")")
