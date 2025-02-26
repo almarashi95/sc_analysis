@@ -230,7 +230,7 @@ def main():
         else:
             masses = analysis.load.load_masses(cg, topology=traj.top)
         print('Loaded masses')
-
+# needs some work as that is not specific enough for me
         if selection_string == 'all_lipids':
             # keep only the lipids
             sel_atoms = traj.top.select("(not name water) and " +
